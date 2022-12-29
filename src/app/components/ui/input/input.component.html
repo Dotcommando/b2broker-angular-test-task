@@ -1,0 +1,34 @@
+<div
+  [style.width]="width || '100%'"
+  class="b2b-input"
+>
+  <label class="b2b-input__label">
+    <span *ngIf="label" class="b2b-input__label-text">
+      {{ label }}
+      <span *ngIf="isRequired" class="b2b-input__label-required">*</span>
+    </span>
+    <div
+      class="b2b-input__input b2b-input__input_size_{{size}}"
+      [class.b2b-input__input_focused]="focused"
+      [class.b2b-input__input_error]="isError"
+      [class.b2b-input__input_disabled]="disabled"
+      [class.b2b-input__input_readonly]="readonly"
+      (click)="focusOnInput()"
+    >
+      <span *ngIf="prefix" class="b2b-input__prefix b2b-input__prefix_{{ size }}">{{ prefix }}</span>
+      <input
+        #inputEl
+        [value]="value"
+        (input)="onInput($event)"
+        (blur)="onBlur($event)"
+        (focus)="onFocus()"
+        (keypress)="onKeyPress($event)"
+        [disabled]="disabled"
+        [placeholder]="placeholder"
+        [readOnly]="readonly"
+        [tabIndex]="tabIndex"
+        class="b2b-input__input-field"
+      >
+    </div>
+  </label>
+</div>

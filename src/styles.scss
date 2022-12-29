@@ -1,1 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Calibri, Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+:root {
+  --border-radius: 6px;
+  --bgrd-light: #f7f7f7;
+  --border-color: rgba(0, 0, 0, 0.175);
+  --border-focused-color: rgba(0, 0, 0, 0.275);
+  --border-disabled-color: rgba(0, 0, 0, 0.175);
+  --text-color: rgba(0, 0, 0, 0.75);
+  --text-disabled-color: #CFD1D0;
+  --placeholder-color: rgba(0, 0, 0, 0.3);
+  --required-color: FireBrick;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --error-color: DarkRed;
+  --error-hover-color: Crimson;
+}

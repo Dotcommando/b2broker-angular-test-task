@@ -1,0 +1,22 @@
+.home-wrapper {
+  width: 100%;
+}
+
+.box {
+  background: var(--bgrd-light);
+  position: relative;
+  max-width: 1440px;
+  padding: 0;
+  margin: 20px auto;
+  border: solid 1px var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+header {
+  padding: 16px 20px;
+  border-bottom: solid 1px var(--border-color);
+}
+
+section {
+  padding: 16px 20px;
+}

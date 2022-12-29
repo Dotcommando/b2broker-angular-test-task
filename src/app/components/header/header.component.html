@@ -1,0 +1,37 @@
+<form class="data-flow-form" [formGroup]="dataFlowControlForm">
+    <div class="b2b-header-wrapper">
+        <div class="b2b-box b2b-box__width-25prc">
+            <app-input
+                [formControlName]="'delay'"
+                [label]="'Timer, ms'"
+                [isRequired]="true"
+                [isError]="!!(dataFlowControlForm.get('delay')?.invalid &&
+                     dataFlowControlForm.get('delay')?.touched &&
+                     dataFlowControlForm.get('delay')?.dirty)"
+                [placeholder]="'data update time'"
+            ></app-input>
+        </div>
+        <div class="b2b-box b2b-box__width-25prc">
+            <app-input
+                [formControlName]="'arraySize'"
+                [label]="'Array size'"
+                [isRequired]="true"
+                [isError]="!!(dataFlowControlForm.get('arraySize')?.invalid &&
+                 dataFlowControlForm.get('arraySize')?.touched &&
+                 dataFlowControlForm.get('arraySize')?.dirty)"
+                [placeholder]="'Array size'"
+            ></app-input>
+        </div>
+        <div class="b2b-box b2b-box__width-50prc">
+            <app-input
+                [formControlName]="'additionalIds'"
+                [label]="'Additional array Ids'"
+                [isRequired]="true"
+                [isError]="!!(dataFlowControlForm.get('additionalIds')?.invalid &&
+                dataFlowControlForm.get('additionalIds')?.touched &&
+                dataFlowControlForm.get('additionalIds')?.dirty)"
+                [placeholder]="'Additional array Ids'"
+            ></app-input>
+        </div>
+    </div>
+</form>
