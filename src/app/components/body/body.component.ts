@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ITableColumn } from '@ui/models/table-column.interface';
 import { IPseudoSocketSettings } from '@models/pseudo-socket-settings.interface';
 import { DEFAULT_ARRAY_SIZE } from '@constants/default-array-size.const';
@@ -78,7 +78,7 @@ export class BodyComponent implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    this.pseudoSocketService.dataEntries$
+    this.pseudoSocketService.trackUpdate$
       .pipe(
         tap(() => {
           this.entriesToShow = this.pseudoSocketService.getItemsByIds(this.idsToShow);
@@ -140,7 +140,7 @@ export class BodyComponent implements OnInit, OnDestroy {
   }
 
   private updateSettingsHandler(settings: IPseudoSocketSettings): void {
-    if (settings.additionalIds !== this.settings.additionalIds) {
+    if (settings.additionalIds !== this.settings.additionalIds || settings.arraySize !== this.settings.arraySize) {
       this.idsToShow = this.calculateWhichElementsToShow(
         settings.additionalIds?.length ? [...settings.additionalIds] : [],
         settings.arraySize,

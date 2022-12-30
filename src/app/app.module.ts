@@ -8,8 +8,8 @@ import { HeaderComponent } from '@components/header/header.component';
 import { BodyComponent } from '@components/body/body.component';
 import { InputComponent } from '@ui/input/input.component';
 import { TableComponent } from '@ui/table/table.component';
-import { TableRowComponent } from './components/ui/table-row/table-row.component';
-import { TableCellComponent } from './components/ui/table-cell/table-cell.component';
+import { TableRowComponent } from '@ui/table-row/table-row.component';
+import { TableCellComponent } from '@ui/table-cell/table-cell.component';
 
 @NgModule({
   declarations: [
