@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { numbersOnlyValidator } from '@helpers/number-only-validator';
 import { positiveIntegerNumberValidator } from '@helpers/positive-integer-number-validator';
@@ -47,12 +47,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.dataFlowControlForm
       .valueChanges
       .pipe(
-        // tap((data) => console.log('BEFORE', data)),
         debounceTime(500),
         switchMap((data: IPseudoSocketSettingsRawData) => this.runDataFlow(data)),
         map((data: IPseudoSocketSettingsRawData) => this.calculateFormData(data)),
         tap((data: IPseudoSocketSettings) => this.pseudoSocketService.setSettings(data)),
-        // tap((data) => console.log('AFTER', data)),
         takeUntil(this.destroyed$),
       )
       .subscribe();
@@ -79,7 +77,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private runDataFlow(data: IPseudoSocketSettingsRawData): Observable<IPseudoSocketSettingsRawData> {
     return this.flowPause$
       .pipe(
-        // tap((isPaused: boolean) => console.log('isPaused', isPaused)),
         switchMap((isPaused: boolean) => {
           return isPaused ? NEVER : of(data);
         }),

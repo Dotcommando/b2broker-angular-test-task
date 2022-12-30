@@ -19,7 +19,7 @@ export class BodyComponent implements OnInit, OnDestroy {
   public columns: ITableColumn[] = [
     {
       title: 'Id',
-      width: 17,
+      width: 12,
     },
     {
       title: 'Int',
@@ -35,13 +35,25 @@ export class BodyComponent implements OnInit, OnDestroy {
     },
     {
       title: 'Child',
-      width: 24.5,
+      width: 29.5,
     },
   ];
 
+  public childColumns: ITableColumn[] = [
+    {
+      title: 'Id',
+      width: 50,
+    },
+    {
+      title: 'Color',
+      width: 50,
+    },
+  ];
+
+  public entriesToShow: DataEntry[] = [];
+
   private maxEntriesToShow = MAX_ENTRIES_TO_SHOW;
   private idsToShow: number[] = [];
-  private entriesToShow: DataEntry[] = [];
   private destroyed$ = new Subject<void>();
 
   private settings: IPseudoSocketSettings = {
@@ -70,10 +82,7 @@ export class BodyComponent implements OnInit, OnDestroy {
       .pipe(
         tap(() => {
           this.entriesToShow = this.pseudoSocketService.getItemsByIds(this.idsToShow);
-          console.log(' ');
-          console.log('Entries to show');
-          console.log(this.idsToShow);
-          console.dir(this.entriesToShow);
+          this.cdr.detectChanges();
         }),
         takeUntil(this.destroyed$),
       )

@@ -1,3 +1,16 @@
 <app-table [columns]="columns">
-
+    <app-table-row *ngFor="let entry of entriesToShow">
+        <app-table-cell [width]="columns[0].width">{{ entry.id }}</app-table-cell>
+        <app-table-cell [width]="columns[1].width">{{ entry.int }}</app-table-cell>
+        <app-table-cell [width]="columns[2].width">{{ entry.float }}</app-table-cell>
+        <app-table-cell [width]="columns[3].width" [bgColor]="entry.color">{{ entry.color }}</app-table-cell>
+        <app-table-cell [width]="columns[4].width">
+            <app-table [columns]="childColumns">
+                <app-table-row [reduceBottomMargin]="true">
+                    <app-table-cell [width]="childColumns[0].width">{{ entry.child.id }}</app-table-cell>
+                    <app-table-cell [width]="childColumns[1].width" [bgColor]="entry.child.color">{{ entry.child.color }}</app-table-cell>
+                </app-table-row>
+            </app-table>
+        </app-table-cell>
+    </app-table-row>
 </app-table>

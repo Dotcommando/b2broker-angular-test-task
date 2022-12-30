@@ -1,0 +1,15 @@
+.b2b-table-row {
+  display: flex;
+  justify-content: stretch;
+  flex-direction: row;
+  border: solid 1px var(--border-color);
+  padding: 20px;
+  margin: 0 0 20px 0;
+  column-gap: 20px;
+}
+
+:host.reduce-bottom-margin {
+  .b2b-table-row {
+    margin-bottom: 0;
+  }
+}
