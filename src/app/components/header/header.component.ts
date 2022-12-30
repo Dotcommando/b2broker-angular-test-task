@@ -5,6 +5,7 @@ import { positiveIntegerNumberValidator } from '@helpers/positive-integer-number
 import { positiveIntegerSeriesValidator } from '@helpers/positive-integer-series-validator';
 import {
   BehaviorSubject,
+  debounceTime,
   distinctUntilChanged,
   map,
   NEVER,
@@ -19,6 +20,7 @@ import { IPseudoSocketSettings } from '@models/pseudo-socket-settings.interface'
 import { IPseudoSocketSettingsRawData } from '@models/pseudo-socket-settings-raw-data.interface';
 import { DEFAULT_DELAY } from '@constants/default-delay.const';
 import { DEFAULT_ARRAY_SIZE } from '@constants/default-array-size.const';
+import { PseudoSocketService } from '@services/pseudo-socket.service';
 
 @Component({
   selector: 'app-header',
@@ -27,13 +29,13 @@ import { DEFAULT_ARRAY_SIZE } from '@constants/default-array-size.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  @Output() dataFlowSettings = new EventEmitter<IPseudoSocketSettings>();
   private destroyed$ = new Subject<void>();
   private flowPause$ = new BehaviorSubject<boolean>(true);
   dataFlowControlForm: FormGroup;
 
   constructor(
     private formBuilder: FormBuilder,
+    private pseudoSocketService: PseudoSocketService,
   ) {
   }
 
@@ -46,15 +48,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .valueChanges
       .pipe(
         // tap((data) => console.log('BEFORE', data)),
+        debounceTime(500),
         switchMap((data: IPseudoSocketSettingsRawData) => this.runDataFlow(data)),
         map((data: IPseudoSocketSettingsRawData) => this.calculateFormData(data)),
-        tap((data: IPseudoSocketSettings) => this.emitDataFlowSettings(data)),
+        tap((data: IPseudoSocketSettings) => this.pseudoSocketService.setSettings(data)),
         // tap((data) => console.log('AFTER', data)),
         takeUntil(this.destroyed$),
       )
       .subscribe();
 
-    this.emitDataFlowSettings(this.calculateFormData(this.dataFlowControlForm.value));
+    this.pseudoSocketService.setSettings(this.calculateFormData(this.dataFlowControlForm.value));
   }
 
   ngOnDestroy(): void {
@@ -145,15 +148,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private calculateFormData(data: IPseudoSocketSettingsRawData): IPseudoSocketSettings {
     const additionalIds = data.additionalIds ? this.getParsedNumbersArray(data.additionalIds) : [];
-    console.log(data.delay, parseInt(data.delay));
+
     return {
       delay: parseInt(data.delay),
       arraySize: parseInt(data.arraySize),
       ...(data.additionalIds && additionalIds.length && { additionalIds }),
     };
-  }
-
-  private emitDataFlowSettings(settings: IPseudoSocketSettings): void {
-    this.dataFlowSettings.emit(settings);
   }
 }

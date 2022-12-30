@@ -11,7 +11,7 @@ export class PseudoSocket {
     const result: IDataEntry[] = [];
 
     for (let i = 0; i < arraySize; i++) {
-      result.push(DataEntry.generateEntry({ id: i }));
+      result.push(DataEntry.generateEntry({ id: String(i) }));
     }
 
     return result;

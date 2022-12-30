@@ -2,10 +2,10 @@ import { IDataEntry } from '@models/data-entry.interface';
 import { IDataEntryChild } from '@models/data-entry-child.interface';
 import { getRandomInteger } from '@helpers/get-random-integer';
 import { WEB_COLOR_ARRAY } from '@constants/colors.enum';
-import { HEX_CHARACTERS } from '@constants/hex-characters.const';
+import { HEX_CHARACTERS, MAX_HEX_CHARACTERS_INDEX } from '@constants/hex-characters.const';
 
 export class DataEntry implements IDataEntry {
-  id: number;
+  id: string;
   int: number;
   float: string;
   color: string;
@@ -19,8 +19,8 @@ export class DataEntry implements IDataEntry {
     this.child = data?.child ? { ...data.child } : this.generateChild();
   }
 
-  private generateId(): number {
-    return getRandomInteger(0, 1000);
+  private generateId(): string {
+    return String(getRandomInteger(0, 1000));
   }
 
   private generateInt(): number {
@@ -39,7 +39,7 @@ export class DataEntry implements IDataEntry {
     let result = '#';
 
     for (let i = 0; i < 6; i++) {
-      const pos = getRandomInteger(0, HEX_CHARACTERS.length - 1);
+      const pos = getRandomInteger(0, MAX_HEX_CHARACTERS_INDEX);
 
       result += HEX_CHARACTERS[pos];
     }
@@ -72,7 +72,7 @@ export class DataEntry implements IDataEntry {
     return DataEntry.generateEntryString(this);
   }
 
-  public static generateEntry(data?: Partial<IDataEntry> & { id: number }): IDataEntry {
+  public static generateEntry(data?: Partial<IDataEntry> & Pick<IDataEntry, 'id'>): IDataEntry {
     const newEntry = new DataEntry(data);
 
     return {
@@ -84,7 +84,7 @@ export class DataEntry implements IDataEntry {
     };
   }
 
-  public static generateEntryString(data?: Partial<IDataEntry> & { id: number }): string {
+  public static generateEntryString(data?: Partial<IDataEntry> & Pick<IDataEntry, 'id'>): string {
     return JSON.stringify(DataEntry.generateEntry(data));
   }
 }

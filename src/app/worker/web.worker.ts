@@ -17,10 +17,9 @@ import { IPseudoSocketSettings } from '@models/pseudo-socket-settings.interface'
       if (!settings) return;
       arraySize = settings?.arraySize && !isNaN(settings.arraySize) ? settings.arraySize : DEFAULT_ARRAY_SIZE;
       delay = settings?.delay && !isNaN(settings.delay) ? settings.delay : DEFAULT_DELAY;
-      postMessage({ redefined: true, delay, settingsDelay: settings.delay });
     },
 
-    generateTimeout: function(evt?: MessageEvent) {
+    generateTimeout: function() {
       timer = setTimeout(() => {
         postMessage(socket.generateDataGrid(arraySize));
 
@@ -33,14 +32,14 @@ import { IPseudoSocketSettings } from '@models/pseudo-socket-settings.interface'
         clearTimeout(timer);
 
         this.setSettings(evt?.data?.settings);
-        this.generateTimeout(evt);
+        this.generateTimeout();
       }
 
       if (evt.data?.type === WORKER_EVENT.CHANGE_SETTINGS) {
         clearTimeout(timer);
 
         this.setSettings(evt?.data?.settings);
-        this.generateTimeout(evt);
+        this.generateTimeout();
       }
 
       if (evt.data?.type === WORKER_EVENT.COMPLETE) {

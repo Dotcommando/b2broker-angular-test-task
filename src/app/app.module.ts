@@ -5,8 +5,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { HomeComponent } from '@components/home/home.component';
 import { HeaderComponent } from '@components/header/header.component';
+import { BodyComponent } from '@components/body/body.component';
 import { InputComponent } from '@ui/input/input.component';
-import { BodyComponent } from './components/body/body.component';
+import { TableComponent } from '@ui/table/table.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { BodyComponent } from './components/body/body.component';
     HomeComponent,
     HeaderComponent,
     BodyComponent,
+    TableComponent,
   ],
   imports: [
     BrowserModule,

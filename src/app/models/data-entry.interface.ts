@@ -1,7 +1,7 @@
 import { IDataEntryChild } from '@models/data-entry-child.interface';
 
 export interface IDataEntry {
-  id: number;
+  id: string;
   int: number;
   float: string;
   color: string;

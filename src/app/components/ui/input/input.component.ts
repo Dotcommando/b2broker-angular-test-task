@@ -282,7 +282,8 @@ export class InputComponent implements ControlValueAccessor {
 
   constructor(
     private cdr: ChangeDetectorRef,
-  ) { }
+  ) {
+  }
 
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {

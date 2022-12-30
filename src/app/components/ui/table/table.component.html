@@ -1,0 +1,12 @@
+<div class="b2b-table">
+    <div class="b2b-table__header">
+        <div
+            class="b2b-table__th"
+            *ngFor="let column of columns"
+            [ngStyle]="{ 'width.%': column.width }"
+        >{{column.title}}</div>
+    </div>
+    <div class="b2b-table__body">
+        <ng-content></ng-content>
+    </div>
+</div>

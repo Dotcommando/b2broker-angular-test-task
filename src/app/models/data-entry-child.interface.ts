@@ -1,4 +1,4 @@
 export interface IDataEntryChild {
-  id: number;
+  id: string;
   color: string;
 }
