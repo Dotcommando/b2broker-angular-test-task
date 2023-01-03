@@ -8,6 +8,8 @@ import { PseudoSocketService } from '@services/pseudo-socket.service';
 import { distinctUntilChanged, Subject, takeUntil, tap } from 'rxjs';
 import { DataEntry } from '../../classes/data-entry.class';
 import { numberArraysAreEqual } from '@helpers/number-arrays-are-equal';
+import { MAIN_TABLE_COLUMNS } from '@constants/main-table-columns.const';
+import { CHILD_TABLE_COLUMNS } from '@constants/child-table-columns.const';
 
 @Component({
   selector: 'app-body',
@@ -16,40 +18,8 @@ import { numberArraysAreEqual } from '@helpers/number-arrays-are-equal';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BodyComponent implements OnInit, OnDestroy {
-  public columns: ITableColumn[] = [
-    {
-      title: 'Id',
-      width: 12,
-    },
-    {
-      title: 'Int',
-      width: 17,
-    },
-    {
-      title: 'Float',
-      width: 17,
-    },
-    {
-      title: 'Color',
-      width: 24.5,
-    },
-    {
-      title: 'Child',
-      width: 29.5,
-    },
-  ];
-
-  public childColumns: ITableColumn[] = [
-    {
-      title: 'Id',
-      width: 50,
-    },
-    {
-      title: 'Color',
-      width: 50,
-    },
-  ];
-
+  public columns: ITableColumn[] = [ ...MAIN_TABLE_COLUMNS ];
+  public childColumns: ITableColumn[] = [ ...CHILD_TABLE_COLUMNS ];
   public entriesToShow: DataEntry[] = [];
 
   private maxEntriesToShow = MAX_ENTRIES_TO_SHOW;
@@ -70,29 +40,9 @@ export class BodyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.pseudoSocketService.settings$
-      .pipe(
-        distinctUntilChanged(this.detectSettingsChanges),
-        tap(this.updateSettingsHandler),
-        takeUntil(this.destroyed$),
-      )
-      .subscribe();
-
-    this.pseudoSocketService.trackUpdate$
-      .pipe(
-        tap(() => {
-          this.entriesToShow = this.pseudoSocketService.getItemsByIds(this.idsToShow);
-          this.cdr.detectChanges();
-        }),
-        takeUntil(this.destroyed$),
-      )
-      .subscribe();
-
-    this.idsToShow = this.calculateWhichElementsToShow(
-      this.settings.additionalIds?.length ? [...this.settings.additionalIds] : [],
-      this.settings.arraySize,
-      this.maxEntriesToShow,
-    );
+    this.initSettingsTracker();
+    this.initEntriesUpdatesTracker();
+    this.setIdsToShow();
   }
 
   ngOnDestroy(): void {
@@ -147,10 +97,44 @@ export class BodyComponent implements OnInit, OnDestroy {
         this.maxEntriesToShow,
       );
 
-      this.entriesToShow = this.pseudoSocketService.getItemsByIds(this.idsToShow);
+      this.pseudoSocketService.setAllSettings({ settings, idsToShow: this.idsToShow });
+
+      this.entriesToShow = this.pseudoSocketService.getEntries();
     }
 
     this.settings = settings;
     this.cdr.markForCheck();
+  }
+
+  private initSettingsTracker(): void {
+    this.pseudoSocketService.settings$
+      .pipe(
+        distinctUntilChanged(this.detectSettingsChanges),
+        tap(this.updateSettingsHandler),
+        takeUntil(this.destroyed$),
+      )
+      .subscribe();
+  }
+
+  private initEntriesUpdatesTracker(): void {
+    this.pseudoSocketService.dataEntries$
+      .pipe(
+        tap((data: DataEntry[]) => {
+          this.entriesToShow = data;
+          this.cdr.detectChanges();
+        }),
+        takeUntil(this.destroyed$),
+      )
+      .subscribe();
+  }
+
+  private setIdsToShow(): void {
+    this.idsToShow = this.calculateWhichElementsToShow(
+      this.settings.additionalIds?.length ? [...this.settings.additionalIds] : [],
+      this.settings.arraySize,
+      this.maxEntriesToShow,
+    );
+
+    this.pseudoSocketService.setIdsToShow(this.idsToShow);
   }
 }

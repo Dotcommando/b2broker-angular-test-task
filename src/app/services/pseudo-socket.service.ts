@@ -18,14 +18,12 @@ export class PseudoSocketService {
     delay: DEFAULT_DELAY,
     arraySize: DEFAULT_ARRAY_SIZE,
   };
+  private idsToShow: number[] = [];
   private dataEntriesSubject$ = new BehaviorSubject<DataEntry[]>([]);
   public dataEntries$ = this.dataEntriesSubject$.asObservable();
 
   private settingsSubject$ = new Subject<IPseudoSocketSettings>();
   public settings$ = this.settingsSubject$.asObservable();
-
-  private trackUpdateSubject$ = new Subject<void>();
-  public trackUpdate$ = this.trackUpdateSubject$.asObservable();
 
   constructor() {
   }
@@ -42,37 +40,48 @@ export class PseudoSocketService {
       if (Array.isArray(msg.data)) {
         this.dataEntriesSubject$
           .next(msg.data.map((entry: IDataEntry): DataEntry => plainToClass(DataEntry, entry)));
-        this.trackUpdateSubject$.next();
       }
     };
 
     this.worker.postMessage({
       type: WORKER_EVENT.INIT,
       settings: { ...this.workerSettings },
+      idsToShow: [ ...this.idsToShow ],
     });
   }
 
-  public setSettings(settings: IPseudoSocketSettings) {
+  public setAllSettings(data: { settings?: IPseudoSocketSettings, idsToShow: number[] }): void {
+    if (data.settings) {
+      this.workerSettings = { ...data.settings };
+      this.settingsSubject$.next({ ...data.settings });
+    }
+
+    this.worker.postMessage({
+      type: WORKER_EVENT.CHANGE_SETTINGS,
+      ...(data.settings && { settings: this.workerSettings }),
+      ...(data.idsToShow && { idsToShow: [ ...data.idsToShow ]}),
+    });
+  }
+
+  public setSettings(settings: IPseudoSocketSettings): void {
     this.workerSettings = { ...settings };
     this.settingsSubject$.next({ ...settings });
 
-    this.worker.postMessage({ type: WORKER_EVENT.CHANGE_SETTINGS, settings: this.workerSettings });
+    this.worker.postMessage({
+      type: WORKER_EVENT.CHANGE_SETTINGS,
+      settings: this.workerSettings,
+    });
   }
 
-  public getItemsByIds(ids: number[]): DataEntry[] {
-    if (ids.length === 0) return [];
+  public setIdsToShow(idsToShow: number[]): void {
+    this.worker.postMessage({
+      type: WORKER_EVENT.CHANGE_SETTINGS,
+      idsToShow: [ ...idsToShow ],
+    });
+  }
 
-    const result: DataEntry[] = [];
-
-    for (let i = 0; i < ids.length; i++) {
-      const index = ids[i];
-
-      if (this.dataEntriesSubject$.getValue()[index]) {
-        result.push(this.dataEntriesSubject$.getValue()[index]);
-      }
-    }
-
-    return result;
+  public getEntries(): DataEntry[] {
+    return this.dataEntriesSubject$.getValue();
   }
 
   public terminate(): void {

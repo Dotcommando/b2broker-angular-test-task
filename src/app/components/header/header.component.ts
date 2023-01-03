@@ -5,12 +5,14 @@ import { positiveIntegerNumberValidator } from '@helpers/positive-integer-number
 import { positiveIntegerSeriesValidator } from '@helpers/positive-integer-series-validator';
 import {
   BehaviorSubject,
+  combineLatest,
   debounceTime,
   distinctUntilChanged,
   map,
   NEVER,
   Observable,
   of,
+  startWith,
   Subject,
   switchMap,
   takeUntil,
@@ -21,6 +23,7 @@ import { IPseudoSocketSettingsRawData } from '@models/pseudo-socket-settings-raw
 import { DEFAULT_DELAY } from '@constants/default-delay.const';
 import { DEFAULT_ARRAY_SIZE } from '@constants/default-array-size.const';
 import { PseudoSocketService } from '@services/pseudo-socket.service';
+import { FORM_INPUT_DEBOUNCE } from '@constants/form-input-debounce.const';
 
 @Component({
   selector: 'app-header',
@@ -31,7 +34,10 @@ import { PseudoSocketService } from '@services/pseudo-socket.service';
 export class HeaderComponent implements OnInit, OnDestroy {
   private destroyed$ = new Subject<void>();
   private flowPause$ = new BehaviorSubject<boolean>(true);
-  dataFlowControlForm: FormGroup;
+  private trackArrayIdsOverflowErrorSubject$ = new BehaviorSubject<boolean>(false);
+
+  public trackArrayIdsOverflowError$ = this.trackArrayIdsOverflowErrorSubject$.asObservable();
+  public dataFlowControlForm: FormGroup;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -43,17 +49,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.initForm();
     this.checkFormStatus();
     this.runDataFlow(this.dataFlowControlForm.value);
-
-    this.dataFlowControlForm
-      .valueChanges
-      .pipe(
-        debounceTime(500),
-        switchMap((data: IPseudoSocketSettingsRawData) => this.runDataFlow(data)),
-        map((data: IPseudoSocketSettingsRawData) => this.calculateFormData(data)),
-        tap((data: IPseudoSocketSettings) => this.pseudoSocketService.setSettings(data)),
-        takeUntil(this.destroyed$),
-      )
-      .subscribe();
+    this.initFormChangeTracker();
+    this.initArrayIdsOversizeTracker();
 
     this.pseudoSocketService.setSettings(this.calculateFormData(this.dataFlowControlForm.value));
   }
@@ -110,21 +107,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private validateDataFlowControlForm(formGroup: FormGroup): ValidationErrors | null {
     const arraySizeValue = formGroup.get('arraySize')?.value;
 
-    if (!arraySizeValue || isNaN(parseInt(arraySizeValue))) {
-      return null;
-    }
+    if (!arraySizeValue || isNaN(parseInt(arraySizeValue))) return null;
 
     const additionalIdsValue = formGroup.get('additionalIds')?.value;
 
-    if (additionalIdsValue === '') {
-      return null;
-    }
+    if (additionalIdsValue === '') return null;
 
     const additionalIds = this.getParsedNumbersArray(additionalIdsValue);
 
-    if (!additionalIds.length) {
-      return null;
-    }
+    if (!additionalIds.length) return null;
 
     const arrayLastIndex = parseInt(arraySizeValue) - 1;
 
@@ -141,6 +132,46 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }, {
       validators: this.validateDataFlowControlForm.bind(this),
     });
+  }
+
+  private initFormChangeTracker(): void {
+    this.dataFlowControlForm
+      .valueChanges
+      .pipe(
+        debounceTime(FORM_INPUT_DEBOUNCE),
+        switchMap((data: IPseudoSocketSettingsRawData) => this.runDataFlow(data)),
+        map((data: IPseudoSocketSettingsRawData) => this.calculateFormData(data)),
+        tap((data: IPseudoSocketSettings) => this.pseudoSocketService.setSettings(data)),
+        takeUntil(this.destroyed$),
+      )
+      .subscribe();
+  }
+
+  private initArrayIdsOversizeTracker(): void {
+    combineLatest([
+      this.dataFlowControlForm.controls['additionalIds'].valueChanges
+        .pipe(
+          startWith(this.dataFlowControlForm.controls['additionalIds'].value),
+        ),
+      this.dataFlowControlForm.controls['arraySize'].valueChanges
+        .pipe(
+          distinctUntilChanged(),
+          startWith(this.dataFlowControlForm.controls['arraySize'].value),
+        ),
+      this.dataFlowControlForm.statusChanges
+        .pipe(
+          distinctUntilChanged(),
+        ),
+    ])
+      .pipe(
+        tap((data: [ string, string, string ]) => {
+          if (data[2] === 'INVALID') {
+            this.trackArrayIdsOverflowErrorSubject$.next(this.validateDataFlowControlForm(this.dataFlowControlForm) !== null);
+          }
+        }),
+        takeUntil(this.destroyed$),
+      )
+      .subscribe();
   }
 
   private calculateFormData(data: IPseudoSocketSettingsRawData): IPseudoSocketSettings {

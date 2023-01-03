@@ -29,7 +29,7 @@
                 [isRequired]="true"
                 [isError]="!!(dataFlowControlForm.get('additionalIds')?.invalid &&
                 dataFlowControlForm.get('additionalIds')?.touched &&
-                dataFlowControlForm.get('additionalIds')?.dirty)"
+                dataFlowControlForm.get('additionalIds')?.dirty) || !!(trackArrayIdsOverflowError$ | async)"
                 [placeholder]="'Additional array Ids'"
             ></app-input>
         </div>
